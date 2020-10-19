@@ -1,16 +1,16 @@
 package com.takhir.redditgallery;
 
 import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
-import android.widget.VideoView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import com.takhir.redditgallery.adapters.ImagesRecyclerAdapter;
 import com.takhir.redditgallery.model.Feed;
+import com.takhir.redditgallery.models.ImageCard;
+import com.takhir.redditgallery.util.VerticalSpacingItemDecoration;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -27,10 +27,16 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
 
     public static final String BASE_URL = "https://www.reddit.com/r/";
-    public LinearLayout myLayout;
 
     public static ArrayList<String> urlsList = new ArrayList<>();
     public static int indexWhenShowImages = 0;
+
+    // UI components
+    private RecyclerView mRecyclerView;
+
+    // vars
+    private final ArrayList<ImageCard> mImageCards = new ArrayList<>();
+    private ImagesRecyclerAdapter mImagesRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,14 +56,14 @@ public class MainActivity extends AppCompatActivity {
         enqueue(call);
         call2 = feedAPI.getFeed2();
         enqueue(call2);
-
     }
 
-    public void enqueue(Call<Feed> call) {
+    private void enqueue(Call<Feed> call) {
 
         call.enqueue(new Callback<Feed>() {
             @Override
             public void onResponse(Call<Feed> call, Response<Feed> response) {
+                assert response.body() != null;
                 Log.e(TAG, "onResponse: feed: " + response.body().toString());
                 Log.e(TAG, "onResponse: Server Response: " + response.toString());
 
@@ -66,15 +72,16 @@ public class MainActivity extends AppCompatActivity {
                 retrieveImageUrlsAndAddToArrayList(entries);
                 retrieveGifUrlsAndAddToArrayList(entries);
 
-                System.out.println("ffffffffffffffff    " + call.request());
-
                 indexWhenShowImages++;
 
                 if (indexWhenShowImages == 2) {
 
-                    Toast.makeText(MainActivity.this, String.valueOf(urlsList.size()), Toast.LENGTH_LONG).show();
+                    mRecyclerView = findViewById(R.id.recyclerView);
+                    initRecyclerView();
+
                     Collections.shuffle(urlsList);
                     System.out.println(urlsList);
+
                     setImages(urlsList);
                 }
             }
@@ -87,20 +94,26 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void setImages(ArrayList<String> urls) {
-        myLayout = findViewById(R.id.linearLayout);
+    private void setImages(ArrayList<String> urls) {
 
         for (String url : urls) {
-            ImageView imageView = new ImageView(MainActivity.this);
+            ImageView imageView = new ImageView(this);
 
-            myLayout.addView(imageView);
-
-            Picasso.get().load(url)
-                    .resize(1080, 0)
-                    .into(imageView);
-
+            ImageCard imageCard = new ImageCard(url, imageView);
+            mImageCards.add(imageCard);
+            mImagesRecyclerAdapter.notifyDataSetChanged();
         }
     }
+
+    private void initRecyclerView() {
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        VerticalSpacingItemDecoration itemDecoration = new VerticalSpacingItemDecoration(0);
+        mRecyclerView.addItemDecoration(itemDecoration);
+        mImagesRecyclerAdapter = new ImagesRecyclerAdapter(mImageCards);
+        mRecyclerView.setAdapter(mImagesRecyclerAdapter);
+    }
+
 }
 
 
