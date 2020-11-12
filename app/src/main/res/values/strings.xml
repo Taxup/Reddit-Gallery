@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Reddit Gallery</string>
+    <string name="chooser_title">Share image via…</string>
+    <string name="load">Load</string>
 </resources>

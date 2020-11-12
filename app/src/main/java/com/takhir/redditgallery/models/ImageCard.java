@@ -3,23 +3,14 @@ package com.takhir.redditgallery.models;
 import android.widget.ImageView;
 
 public class ImageCard {
-    private String title;
+    private String url;
     private ImageView image;
 
-    public ImageCard(String title, ImageView image) {
-        this.title = title;
-        this.image = image;
+    public ImageCard(String url) {
+        this.url = url;
     }
 
     public ImageCard() {
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public ImageView getImage() {
@@ -30,11 +21,18 @@ public class ImageCard {
         this.image = image;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return "ImageCard{" +
-                "title='" + title + '\'' +
-                ", content='" + image + '\'' +
+                "url='" + url + '\'' +
                 '}';
     }
 }

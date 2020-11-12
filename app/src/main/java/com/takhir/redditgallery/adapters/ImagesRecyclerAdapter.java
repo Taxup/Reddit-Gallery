@@ -12,12 +12,17 @@ import com.takhir.redditgallery.models.ImageCard;
 
 import java.util.ArrayList;
 
+
 public class ImagesRecyclerAdapter extends RecyclerView.Adapter<ImagesRecyclerAdapter.ViewHolder> {
 
-    private final ArrayList<ImageCard> imageCards;
+    private static final String TAG = "ImagesRecyclerAdapter";
 
-    public ImagesRecyclerAdapter(ArrayList<ImageCard> imageCards) {
+    private final ArrayList<ImageCard> imageCards;
+    private OnLongImageListener onLongImageListener;
+
+    public ImagesRecyclerAdapter(ArrayList<ImageCard> imageCards, OnLongImageListener onLongImageListener) {
         this.imageCards = imageCards;
+        this.onLongImageListener = onLongImageListener;
     }
 
 
@@ -25,14 +30,14 @@ public class ImagesRecyclerAdapter extends RecyclerView.Adapter<ImagesRecyclerAd
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.layout_image_card, viewGroup, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, onLongImageListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
-//        viewHolder.image = imageCards.get(i).getImage();
-//        viewHolder.title.setText(imageCards.get(i).getTitle());
-        Picasso.get().load(imageCards.get(i).getTitle()).resize(1080, 0).into(viewHolder.image);
+        String url = imageCards.get(i).getUrl();
+        imageCards.get(i).setImage(viewHolder.image);
+        Picasso.get().load(url).resize(1080, 0).into(viewHolder.image);
     }
 
     @Override
@@ -40,14 +45,27 @@ public class ImagesRecyclerAdapter extends RecyclerView.Adapter<ImagesRecyclerAd
         return imageCards.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        //        TextView title;
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
         ImageView image;
+        OnLongImageListener onLongImageListener;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, OnLongImageListener onLongImageListener) {
             super(itemView);
-//            this.title = itemView.findViewById(R.id.title);
             this.image = itemView.findViewById(R.id.imageView);
+            this.onLongImageListener = onLongImageListener;
+
+            itemView.setOnLongClickListener(this);
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            onLongImageListener.onLongImageClick(getAdapterPosition());
+            return false;
         }
     }
+
+    public interface OnLongImageListener {
+        void onLongImageClick(int position);
+    }
+
 }
